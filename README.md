@@ -1,2 +1,2 @@
 # CoNA_chat
-Chatting program
+Web base chat program
