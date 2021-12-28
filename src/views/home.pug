@@ -12,10 +12,12 @@ html(lang="en")
     header 
       h1 CoNA_chat
       ul
-        li
-          a home 
-          a(href="#" onClick="toggleDarkMode();" id="colorToggle") Dark Mode
+        a(href="#") home&nbsp;
+        a(href="#" onClick="toggleDarkMode();" id="colorToggle") Dark Mode
     main
       h2 Welcome!
-      button btn1
+      ul
+      form
+        input(type="text", placeholder="Write a message", required)
+        button Send
     script(src="/public/js/app.js")
