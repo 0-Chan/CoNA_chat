@@ -5,7 +5,7 @@ html(lang="en")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title CoNA_chat
-    //- link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet", href="https://unpkg.com/mvp.css")
     style
       include style.css
   body
@@ -16,8 +16,12 @@ html(lang="en")
         a(href="#" onClick="toggleDarkMode();" id="colorToggle") Dark Mode
     main
       h2 Welcome!
-      ul
-      form
+      form#nickname
+        input(type="text", placeholder="Your name?", required)
+        button Save
+        h3#current_nick Anonymous
+      ul#conversation
+      form#message
         input(type="text", placeholder="Write a message", required)
         button Send
     script(src="/public/js/app.js")
