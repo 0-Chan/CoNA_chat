@@ -1,5 +1,5 @@
 import http from "http";
-import { WebSocketServer } from "ws";
+import SocketIo from "socket.io"
 import express from "express";
 
 const app = express();
@@ -11,29 +11,17 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
+const httpServer = http.createServer(app);
+const ioServer = SocketIo(httpServer);
 
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-
-const sockets = [];
-
-wss.on("connection", (socket) => {
-  sockets.push(socket);
-  socket["nickname"] = "Anonymous"
-  console.log("Connected to Browser ◈");
-  socket.on("close", () => console.log("Disconnected from the Browser ◇"));
-
-  socket.on("message", (msg) => {
-    const message = JSON.parse(msg);
-    switch (message.type) {
-      case "new_message":
-        sockets.forEach((aSocket) => 
-          aSocket.send(`${socket.nickname}: ${message.payload}`));
-      case "nickname":
-        socket["nickname"] = message.payload;
-    }
-  })
+ioServer.on("connection", socket => {
+  socket.on("enter_room", (roomName, done) => {
+    console.log(roomName);
+    setTimeout(() => {
+      done("im backend");
+    }, 5000);
+  });
 });
 
-server.listen(3000, handleListen);
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
+httpServer.listen(3000, handleListen);

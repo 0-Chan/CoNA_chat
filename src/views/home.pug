@@ -15,13 +15,9 @@ html(lang="en")
         a(href="#") home&nbsp;
         a(href="#" onClick="toggleDarkMode();" id="colorToggle") Dark Mode
     main
-      h2 Welcome!
-      form#nickname
-        input(type="text", placeholder="Your name?", required)
-        button Save
-        h3#current_nick Anonymous
-      ul#conversation
-      form#message
-        input(type="text", placeholder="Write a message", required)
-        button Send
+      div#welcome
+        form
+          input(placeholder="room name", required, type="text")
+          button Enter Room
+    script(src="/socket.io/socket.io.js")
     script(src="/public/js/app.js")
