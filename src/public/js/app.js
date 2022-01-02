@@ -12,13 +12,13 @@ let myStream;
 let muted = false;
 let cameraOff = false;
 let roomName;
+let myPeerConnection;
 
 async function getCameras() {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter(device => device.kind === "videoinput");
     const currentCamera = myStream.getVideoTracks()[0];
-    console.log(myStream.getVideoTracks());
     cameras.forEach(camera => {
       const option = document.createElement("option")
       option.value = camera.deviceId
@@ -27,11 +27,6 @@ async function getCameras() {
         option.selected = true;
       }
       camerasSelect.appendChild(option);
-
-      const options = document.createElement("option")
-      options.value = camera.deviceId
-      options.innerText = camera.label;
-      camerasSelect.appendChild(options);
     })
   } catch(error) {
     console.log(error);
@@ -89,7 +84,6 @@ function handelCameraClick() {
 }
 
 async function handelCameraChange() {
-  console.log(camerasSelect.value);
   await getMedia(camerasSelect.value)
 }
 
@@ -102,10 +96,11 @@ camerasSelect.addEventListener("input", handelCameraChange)
 const welcome = document.getElementById("welcome");
 welcomeForm = welcome.querySelector("form");
 
-function startMedia() {
+async function startMedia() {
   welcome.hidden = true;
   call.hidden = false;
-  getMedia();
+  await getMedia();
+  makeConnection();
 }
 
 function handleWelcomeSubmit(event){
@@ -118,8 +113,23 @@ function handleWelcomeSubmit(event){
 
 welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
-socket.on("welcome", () => {
-  console.log("Someone is here");
+socket.on("welcome", async () => {
+  const offer = await myPeerConnection.createOffer();
+  myPeerConnection.setLocalDescription(offer)
+  console.log("Sent the offer");
+  socket.emit("offer", offer, roomName);
+})
+
+// webRTC part
+function makeConnection() {
+   myPeerConnection = new RTCPeerConnection();
+   myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream));
+}
+
+socket.on("offer", offer => {
+  console.log(offer);
 })
 
 // Dark mode part
