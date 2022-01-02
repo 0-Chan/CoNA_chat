@@ -122,26 +122,54 @@ socket.on("welcome", async () => {
   socket.emit("offer", offer, roomName);
 })
 
+socket.on("answer", answer => {
+  console.log("received the answer");
+  myPeerConnection.setRemoteDescription(answer);
+});
+
+socket.on("ice", ice => {
+  console.log("Received candi!");
+  myPeerConnection.addIceCandidate(ice);
+});
+
 // webRTC part
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener("icecandidate", handleIce);
+  myPeerConnection.addEventListener("addstream", handleAddStream);
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
 }
 
+function handleIce(data) {
+  console.log("Sent candidate!");
+  socket.emit("ice", data.candidate, roomName);
+}
+
+function handleAddStream(data) {
+  const peerFace = document.getElementById("peerFace");
+  peerFace.srcObject = data.stream;
+  console.log("pee str :", data.stream);
+  console.log("my str :", myStream);
+
+}
+
 // Firefox
 socket.on("offer", async (offer) => {
+  console.log("received the offer");
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);
   socket.emit("answer", answer, roomName);
+  console.log("sent the anwser");
 })
 
-socket.on("answer", answer => {
-  myPeerConnection.setRemoteDescription(answer);
 
-});
+
+
+
+
 
 // Dark mode part
 function toggleDarkMode() {
