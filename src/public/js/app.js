@@ -4,10 +4,14 @@ const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
+const call = document.getElementById("call");
+
+call.hidden = true;
 
 let myStream;
 let muted = false;
 let cameraOff = false;
+let roomName;
 
 async function getCameras() {
   try {
@@ -56,7 +60,7 @@ async function getMedia(deviceId) {
   }
 }
 
-getMedia();
+// getMedia();
 
 function handelMuteClick() {
   myStream
@@ -81,7 +85,6 @@ function handelCameraClick() {
   } else {
     cameraBtn.innerText = "🖐Cam OFF"
     cameraOff = true;
-  
   }
 }
 
@@ -95,86 +98,29 @@ cameraBtn.addEventListener("click", handelCameraClick);
 camerasSelect.addEventListener("input", handelCameraChange)
 
 
-const welcome = document.getElementById("welcome")
-const form = welcome.querySelector("form");
-const room = document.getElementById("room");
-room.hidden = true;
+// Welcome part (join a room)
+const welcome = document.getElementById("welcome");
+welcomeForm = welcome.querySelector("form");
 
-let roomName;
-
-function addMessage(message){
-  const ul = room.querySelector("ul")
-  const li = document.createElement("li")
-  li.innerText = message;
-  ul.appendChild(li);
-}
-
-function handleMessageSubmit(event){
-  event.preventDefault();
-  const input = room.querySelector("#msg input");
-  const value = input.value;
-  socket.emit("new_message", input.value, roomName, () => {
-    addMessage(`You: ${input.value}`);
-    input.value = "";
-  });
-}
-
-function handleNicknameSubmit(event) {
-  event.preventDefault();
-  const input = room.querySelector("#nickname input");
-  const value = input.value;
-  socket.emit("nickname", input.value);
-}
-
-function showRoom() {
+function startMedia() {
   welcome.hidden = true;
-  room.hidden = false;
-  const h3 = room.querySelector("h3");
-  h3.innerText = `Room ${roomName}`;
-  const msgForm = room.querySelector("#msg");
-  const nickForm = room.querySelector("#nickname");
-  msgForm.addEventListener("submit", handleMessageSubmit);
-  nickForm.addEventListener("submit", handleNicknameSubmit);
-
+  call.hidden = false;
+  getMedia();
 }
 
-function handleRoomSubmit(event){
+function handleWelcomeSubmit(event){
   event.preventDefault();
-  const input = form.querySelector("input");
-  socket.emit("enter_room", input.value, showRoom);
+  const input = welcomeForm.querySelector("input");
+  socket.emit("join_room", input.value, startMedia);
   roomName = input.value;
   input.value = "";
 }
 
-form.addEventListener("submit", handleRoomSubmit);
+welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
-socket.on("welcome", (user, newCount) => {
-  const h3 = room.querySelector("h3");
-  h3.innerText = `Room ${roomName} (${newCount})`;
-  addMessage(`${user} joined!`);
+socket.on("welcome", () => {
+  console.log("Someone is here");
 })
-
-socket.on("bye", (left, newCount) => {
-  const h3 = room.querySelector("h3");
-  h3.innerText = `Room ${roomName} (${newCount})`;
-  addMessage(`${left} left uu!`);
-})
-
-socket.on("new_message", addMessage);
-
-socket.on("room_change", (rooms) => {
-  const roomList = welcome.querySelector("ul");
-  roomList.innerHTML = "";
-  if(rooms.length === 0){
-    return;
-  }
-  rooms.forEach(room => {
-    const li = document.createElement("li");
-    li.innerText = room;
-    roomList.append(li);
-  })
-});
-
 
 // Dark mode part
 function toggleDarkMode() {
