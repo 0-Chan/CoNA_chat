@@ -15,8 +15,13 @@ html(lang="en")
         a(href="#") home&nbsp;
         a(href="#" onClick="toggleDarkMode();" id="colorToggle") Dark Mode
     main
+      div#myStream
+        video#myFace(autoplay,playsinline, width="400", height="400")
+        button#mute 🔇Mute
+        button#camera 🖐Cam OFF
+        select#cameras
       div#welcome
-        form
+        form 
           input(placeholder="room name", required, type="text")
           button Enter Room
         h4 Open Rooms:

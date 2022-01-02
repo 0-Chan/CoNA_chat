@@ -1,5 +1,100 @@
 const socket = io();
 
+const myFace = document.getElementById("myFace");
+const muteBtn = document.getElementById("mute");
+const cameraBtn = document.getElementById("camera");
+const camerasSelect = document.getElementById("cameras");
+
+let myStream;
+let muted = false;
+let cameraOff = false;
+
+async function getCameras() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter(device => device.kind === "videoinput");
+    const currentCamera = myStream.getVideoTracks()[0];
+    console.log(myStream.getVideoTracks());
+    cameras.forEach(camera => {
+      const option = document.createElement("option")
+      option.value = camera.deviceId
+      option.innerText = camera.label;
+      if(currentCamera.id === camera.id) {
+        option.selected = true;
+      }
+      camerasSelect.appendChild(option);
+
+      const options = document.createElement("option")
+      options.value = camera.deviceId
+      options.innerText = camera.label;
+      camerasSelect.appendChild(options);
+    })
+  } catch(error) {
+    console.log(error);
+  }
+}
+
+async function getMedia(deviceId) {
+  const initialConstraints = {
+    video: { facingMode: "user" },
+    audio: true,
+  };
+  const cameraConstraints = {
+    video: { deviceId : { exact: deviceId } },
+    audio: true,
+  };
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia(
+      deviceId ? cameraConstraints : initialConstraints
+    );
+    myFace.srcObject = myStream;
+    if(!deviceId){
+      await getCameras();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+getMedia();
+
+function handelMuteClick() {
+  myStream
+    .getAudioTracks()
+    .forEach((track) => (track.enabled = !track.enabled));
+  if (!muted) {
+    muteBtn.innerText = "🔊Unmute";
+    muted = true;
+  } else {
+    muteBtn.innerText = "🔇Mute";
+    muted = false;
+  }
+}
+
+function handelCameraClick() {
+  myStream
+    .getVideoTracks()
+    .forEach((track) => (track.enabled = !track.enabled));
+  if (cameraOff) {
+    cameraBtn.innerText = "👌Cam ON"
+    cameraOff = false;
+  } else {
+    cameraBtn.innerText = "🖐Cam OFF"
+    cameraOff = true;
+  
+  }
+}
+
+async function handelCameraChange() {
+  console.log(camerasSelect.value);
+  await getMedia(camerasSelect.value)
+}
+
+muteBtn.addEventListener("click", handelMuteClick);
+cameraBtn.addEventListener("click", handelCameraClick);
+camerasSelect.addEventListener("input", handelCameraChange)
+
+
 const welcome = document.getElementById("welcome")
 const form = welcome.querySelector("form");
 const room = document.getElementById("room");
