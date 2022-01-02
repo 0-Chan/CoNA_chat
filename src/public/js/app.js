@@ -85,6 +85,13 @@ function handelCameraClick() {
 
 async function handelCameraChange() {
   await getMedia(camerasSelect.value)
+  if (myPeerConnection) {
+    const videoTrack = myStream.getVideoTracks()[0];
+    const videoSender = myPeerConnection
+      .getSenders()
+      .find(sender => sender.track.kind === "video");
+    videoSender.replaceTrack(videoTrack);
+  }
 }
 
 muteBtn.addEventListener("click", handelMuteClick);
@@ -150,9 +157,6 @@ function handleIce(data) {
 function handleAddStream(data) {
   const peerFace = document.getElementById("peerFace");
   peerFace.srcObject = data.stream;
-  console.log("pee str :", data.stream);
-  console.log("my str :", myStream);
-
 }
 
 // Firefox
